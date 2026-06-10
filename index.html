@@ -159,7 +159,6 @@
             </div>
 
             <div class="glass-card w-full max-w-md rounded-3xl p-8 md:p-10 text-center relative z-20 min-h-[320px] flex flex-col items-center justify-center transition-all duration-300 transform shadow-xl">
-                <div id="dice-icon" class="text-6xl mb-4 transition-transform duration-300">🎲</div>
                 
                 <div class="h-full flex flex-col items-center justify-center w-full gap-4">
                     <div id="target-player-display" class="hidden text-xl md:text-2xl font-bold text-pink-600 bg-pink-100 px-4 py-2 rounded-xl border border-pink-200">
@@ -195,12 +194,17 @@
         const targetPlayerDisplay = document.getElementById('target-player-display');
         const turnIndicator = document.getElementById('turn-indicator');
         const clickHint = document.getElementById('click-hint');
-        const diceIcon = document.getElementById('dice-icon');
         
         const inputPlayerName = document.getElementById('input-player-name');
         const inputRoomCode = document.getElementById('input-room-code');
         const p1NameEl = document.getElementById('player1-name');
         const p2NameEl = document.getElementById('player2-name');
+
+        // โหลดชื่อที่เคยกรอกไว้จาก LocalStorage
+        const savedName = localStorage.getItem('playerName');
+        if (savedName) {
+            inputPlayerName.value = savedName;
+        }
 
         // ฟังก์ชันแจ้งเตือน
         function showToast(message, isError = true) {
@@ -327,6 +331,8 @@
                 showToast("กรุณากรอกชื่อของคุณด้วยนะ");
                 return false;
             }
+            // บันทึกชื่อลง LocalStorage
+            localStorage.setItem('playerName', localPlayerName);
             return true;
         }
 
@@ -501,8 +507,6 @@
             questionText.classList.add('shaking');
             targetPlayerDisplay.classList.add('shaking');
             
-            diceIcon.style.transform = `rotate(${Math.random() * 360 * 3}deg) scale(1.2)`;
-            
             const pKeys = Object.keys(roomPlayers);
             if (pKeys.length === 0) return;
 
@@ -560,7 +564,7 @@
             if (targetUid) {
                 // ระบบออนไลน์จริง
                 if (targetUid === localUserId) {
-                    targetPlayerDisplay.innerHTML = `คนโดน: <span class="underline">คุณเอง 🙋</span> 🎉`;
+                    targetPlayerDisplay.innerHTML = `คนโดน: <span class="underline">คุณเอง</span>`;
                     questionText.innerHTML = `
                         <div class="flex flex-col items-center gap-2 p-2">
                             <div class="text-4xl animate-bounce">🔒</div>
@@ -569,7 +573,7 @@
                         </div>
                     `;
                 } else {
-                    targetPlayerDisplay.innerHTML = `คนโดน: <span class="underline">${targetName}</span> 🎉`;
+                    targetPlayerDisplay.innerHTML = `คนโดน: <span class="underline">${targetName}</span>`;
                     questionText.innerHTML = `
                         <div class="flex flex-col items-center gap-1">
                             <span class="text-xs text-pink-500 font-semibold tracking-wider uppercase mb-1 bg-pink-50 px-2.5 py-0.5 rounded-full">📢 อ่านคำถามนี้ให้คนคุยฟัง:</span>
@@ -590,8 +594,6 @@
             
             questionText.classList.add('pop-in');
             targetPlayerDisplay.classList.add('pop-in');
-            
-            diceIcon.style.transform = 'rotate(0deg) scale(1)';
         }
 
         initAuth();
