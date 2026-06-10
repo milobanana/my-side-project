@@ -212,25 +212,28 @@
         }
 
         // ตั้งค่า Firebase
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'random-dare-game';
-        const firebaseConfigStr = typeof __firebase_config !== 'undefined' ? __firebase_config : null;
+        const appId = 'random-dare-game';
+        const myFirebaseConfig = {
+            projectId: "random-dare-game",
+            appId: "1:739127832053:web:24462f67be06c4c95d84bc",
+            storageBucket: "random-dare-game.firebasestorage.app",
+            apiKey: "AIzaSyDX8Yw12A1U0FfwFG70Z4NoUFqy5rKQ53s",
+            authDomain: "random-dare-game.firebaseapp.com",
+            messagingSenderId: "739127832053",
+            measurementId: "G-NPV8HEZSLR"
+        };
         
         let app, db, auth;
         let isFirebaseReady = false;
 
         try {
-            if (firebaseConfigStr) {
-                app = initializeApp(JSON.parse(firebaseConfigStr));
-            } else {
-                const myFirebaseConfig = {}; 
-                app = initializeApp(myFirebaseConfig);
-            }
+            app = initializeApp(myFirebaseConfig);
             db = getFirestore(app);
             auth = getAuth(app);
             isFirebaseReady = true;
         } catch (error) {
             console.error("Firebase Init Error:", error);
-            showToast("ระบบออนไลน์มีปัญหา (ขาด Firebase Config)");
+            showToast("ระบบออนไลน์มีปัญหา (ตั้งค่า Firebase ไม่สำเร็จ)");
         }
 
         // ตัวแปรสถานะเกม
