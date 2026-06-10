@@ -242,7 +242,9 @@
         let localUserId = null;
         let localPlayerName = '';
         let localRollingInterval = null;
+        let localRollingTimeout = null;
         let isRollingAnimationActive = false;
+        let isRequestingRoll = false;
         let roomPlayers = {}; 
         let amICurrentRoller = false;
         let lastSeenRollId = null;
@@ -501,7 +503,7 @@
                     startLocalRollingAnimation();
                     
                     // ตั้งเวลาหยุดเป๊ะๆ 2 วินาทีในเครื่องแต่ละคน
-                    setTimeout(() => {
+                    localRollingTimeout = setTimeout(() => {
                         stopLocalRollingAnimation(data.text, data.targetPlayerUid);
                     }, 2000);
                 } else if (!data.rollId && !isRollingAnimationActive) {
@@ -519,6 +521,9 @@
 
         // ฟังก์ชันเริ่มแอนิเมชันสุ่ม
         function startLocalRollingAnimation() {
+            if (localRollingInterval) clearInterval(localRollingInterval);
+            if (localRollingTimeout) clearTimeout(localRollingTimeout);
+            
             isRollingAnimationActive = true;
             questionText.classList.remove('pop-in');
             turnIndicator.classList.add('opacity-0');
@@ -549,7 +554,9 @@
                 return;
             }
 
-            if (isRollingAnimationActive) return;
+            if (isRollingAnimationActive || isRequestingRoll) return;
+            
+            isRequestingRoll = true;
 
             const docRef = getRoomDocRef(currentRoomId);
             try {
@@ -568,13 +575,19 @@
             } catch (error) {
                 console.error("Error during rolling:", error);
                 showToast("เกิดข้อผิดพลาดในการสุ่มออนไลน์");
+            } finally {
+                // ปลดล็อคการกดเพื่อป้องกันการกดซ้ำรัวๆ
+                setTimeout(() => { isRequestingRoll = false; }, 1000);
             }
         });
 
         // หยุดอนิเมชันพร้อมแสดงผลลัพธ์แยกตามบทบาท (ผู้ตอบจะไม่เห็นคำถาม)
         function stopLocalRollingAnimation(finalText, targetUid) {
             isRollingAnimationActive = false;
-            clearInterval(localRollingInterval);
+            if (localRollingInterval) clearInterval(localRollingInterval);
+            if (localRollingTimeout) clearTimeout(localRollingTimeout);
+            localRollingInterval = null;
+            localRollingTimeout = null;
             
             const targetName = roomPlayers[targetUid]?.name || 'ไม่ทราบชื่อ';
             
