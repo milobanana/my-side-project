@@ -245,6 +245,7 @@
         let isRollingAnimationActive = false;
         let roomPlayers = {}; 
         let amICurrentRoller = false;
+        let lastSeenRollId = null;
 
         // ข้อมูลภารกิจทั้ง 100 ข้อ
         const missions = [
@@ -467,42 +468,23 @@
                     }
                 }
 
-                // จัดการ Animation หมุน / แสดงผลลัพธ์
-                if (data.status === 'rolling' && !isRollingAnimationActive) {
+                // จัดการแบบใหม่: ควบคุมเวลาแอนิเมชันในเครื่องตัวเอง
+                if (data.rollId && data.rollId !== lastSeenRollId) {
+                    lastSeenRollId = data.rollId;
+                    
                     startLocalRollingAnimation();
-                } else if (data.status === 'idle') {
-                    if (isRollingAnimationActive) {
+                    
+                    // ตั้งเวลาหยุดเป๊ะๆ 2 วินาทีในเครื่องแต่ละคน
+                    setTimeout(() => {
                         stopLocalRollingAnimation(data.text, data.targetPlayerUid);
-                    } else {
-                        // โชว์ผลลัพธ์ปกติเมื่อเริ่มเข้าห้องหรือรีเฟรชหน้า
-                        if (data.targetPlayerUid) {
-                            targetPlayerDisplay.classList.remove('hidden');
-                            
-                            // ระบบตรวจว่าผู้ถูกถาม (target) จะต้องมองไม่เห็นคำถาม
-                            if (data.targetPlayerUid === localUserId) {
-                                targetPlayerDisplay.innerHTML = `คนโดน: <span class="underline">คุณเอง 🙋</span> 🎉`;
-                                questionText.innerHTML = `
-                                    <div class="flex flex-col items-center gap-2 p-2">
-                                        <div class="text-4xl">🔒</div>
-                                        <span class="font-bold text-gray-500 text-base md:text-xl">ภารกิจถูกซ่อนไว้!</span>
-                                        <span class="text-sm font-normal text-gray-400">คุณเป็นฝ่ายตอบ รอเพื่อนเปิดไมค์บอกภารกิจนะ 🤫</span>
-                                    </div>
-                                `;
-                            } else {
-                                const partnerName = roomPlayers[data.targetPlayerUid]?.name || "เพื่อน";
-                                targetPlayerDisplay.innerHTML = `คนโดน: <span class="underline">${partnerName}</span> 🎉`;
-                                questionText.innerHTML = `
-                                    <div class="flex flex-col items-center gap-1">
-                                        <span class="text-xs text-pink-500 font-semibold tracking-wider uppercase mb-1 bg-pink-50 px-2.5 py-0.5 rounded-full">📢 อ่านภารกิจนี้ให้อีกฝ่ายฟัง:</span>
-                                        <span class="font-bold text-indigo-900 text-lg md:text-2xl leading-relaxed">${data.text}</span>
-                                    </div>
-                                `;
-                            }
-                        } else {
-                            targetPlayerDisplay.classList.add('hidden');
-                            questionText.innerHTML = `<span class="font-bold text-indigo-900">${data.text}</span>`;
-                        }
-                    }
+                    }, 2000);
+                } else if (!data.rollId && !isRollingAnimationActive) {
+                    // สถานะก่อนเริ่มเกม
+                    targetPlayerDisplay.classList.add('hidden');
+                    questionText.innerHTML = `<span class="font-bold text-indigo-900">${data.text || ''}</span>`;
+                } else if (data.rollId === lastSeenRollId && !isRollingAnimationActive) {
+                    // กรณีคนเข้าห้องมาทีหลัง หรือรีเฟรชหน้าเว็บ ให้โชว์ผลลัพธ์ล่าสุดได้เลย
+                    stopLocalRollingAnimation(data.text, data.targetPlayerUid);
                 }
             }, (error) => {
                 console.error("Snapshot error:", error);
@@ -528,7 +510,7 @@
                 questionText.innerHTML = `<span class="opacity-50">${getRandomMission()}</span>`;
                 const randomName = roomPlayers[pKeys[Math.floor(Math.random() * pKeys.length)]]?.name || "...";
                 targetPlayerDisplay.innerHTML = `ลุ้นคนโดน: <span class="text-gray-500">${randomName}</span>`;
-            }, 80);
+            }, 150);
         }
 
         // กดสุ่ม (Touch Area)
@@ -550,25 +532,18 @@
 
             const docRef = getRoomDocRef(currentRoomId);
             try {
-                // 1. ส่งคำสั่งว่ากำลังสุ่ม
+                const finalMission = getRandomMission();
+                const targetUid = pKeys[Math.floor(Math.random() * pKeys.length)];
+                const newRollId = Date.now().toString() + Math.floor(Math.random()*1000);
+
+                // ส่งคำสั่งยิงไปครั้งเดียว ทั้ง A และ B จะจำลองแอนิเมชัน 2 วินาทีในเครื่องตัวเอง ทำให้ไม่มีใครค้าง
                 await updateDoc(docRef, {
-                    status: 'rolling'
+                    rollId: newRollId,
+                    text: finalMission,
+                    targetPlayerUid: targetUid,
+                    currentRollerUid: targetUid,
+                    updatedAt: serverTimestamp()
                 });
-
-                // 2. จำลองอนิเมชันลุ้น 2 วินาที ก่อนส่งคำตอบจริงไปจัดสรรคิว
-                setTimeout(async () => {
-                    const finalMission = getRandomMission();
-                    const targetUid = pKeys[Math.floor(Math.random() * pKeys.length)];
-
-                    // ส่งข้อมูลเข้าระบบออนไลน์
-                    await updateDoc(docRef, {
-                        status: 'idle',
-                        text: finalMission,
-                        targetPlayerUid: targetUid,
-                        currentRollerUid: targetUid,
-                        updatedAt: serverTimestamp()
-                    });
-                }, 2000);
             } catch (error) {
                 console.error("Error during rolling:", error);
                 showToast("เกิดข้อผิดพลาดในการสุ่มออนไลน์");
