@@ -249,6 +249,10 @@
         let amICurrentRoller = false;
         let lastSeenRollId = null;
         let previousPlayers = {};
+        
+        // สำหรับป้องกันสุ่มซ้ำคนเดิมเกิน 2 ครั้ง
+        let globalTargetUid = null;
+        let globalTargetStreak = 0;
 
         // ข้อมูลภารกิจทั้ง 100 ข้อ
         const missions = [
@@ -451,10 +455,16 @@
         function listenToRoom(roomId) {
             const docRef = getRoomDocRef(roomId);
             
-            unsubscribeSnapshot = onSnapshot(docRef, (docSnap) => {
+            unsubscribeSnapshot = onSnapshot(docRef, { includeMetadataChanges: true }, (docSnap) => {
                 if (!docSnap.exists()) return;
                 
+                // ถ้ารอข้อมูลจากเซิร์ฟเวอร์ ให้ข้ามไปก่อน เพื่อแก้ปัญหาเครื่องคนกดหมุนไปก่อนแต่เครื่องอีกคนไม่อัปเดตเมื่อเน็ตกระตุก
+                if (docSnap.metadata.hasPendingWrites) return;
+                
                 const data = docSnap.data();
+                
+                globalTargetUid = data.targetPlayerUid || null;
+                globalTargetStreak = data.targetStreak || 0;
                 roomPlayers = data.players || {};
                 
                 // แจ้งเตือนเมื่อมีคนออกจากห้อง
@@ -561,7 +571,21 @@
             const docRef = getRoomDocRef(currentRoomId);
             try {
                 const finalMission = getRandomMission();
-                const targetUid = pKeys[Math.floor(Math.random() * pKeys.length)];
+                let targetUid;
+
+                // ถ้าคนก่อนหน้าโดนมาแล้ว 2 รอบติด รอบนี้บังคับเปลี่ยนคน
+                if (globalTargetUid && globalTargetStreak >= 2) {
+                    const otherPlayers = pKeys.filter(k => k !== globalTargetUid);
+                    if (otherPlayers.length > 0) {
+                        targetUid = otherPlayers[Math.floor(Math.random() * otherPlayers.length)];
+                    } else {
+                        targetUid = pKeys[Math.floor(Math.random() * pKeys.length)];
+                    }
+                } else {
+                    targetUid = pKeys[Math.floor(Math.random() * pKeys.length)];
+                }
+
+                const newStreak = (targetUid === globalTargetUid) ? globalTargetStreak + 1 : 1;
                 const newRollId = Date.now().toString() + Math.floor(Math.random()*1000);
 
                 // ส่งคำสั่งยิงไปครั้งเดียว ทั้ง A และ B จะจำลองแอนิเมชัน 2 วินาทีในเครื่องตัวเอง ทำให้ไม่มีใครค้าง
@@ -570,6 +594,7 @@
                     text: finalMission,
                     targetPlayerUid: targetUid,
                     currentRollerUid: targetUid,
+                    targetStreak: newStreak,
                     updatedAt: serverTimestamp()
                 });
             } catch (error) {
