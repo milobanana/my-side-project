@@ -185,6 +185,32 @@
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // UI Elements
+        const uiLoading = document.getElementById('loading-screen');
+        const uiLobby = document.getElementById('lobby-screen');
+        const uiGame = document.getElementById('game-screen');
+        const toastEl = document.getElementById('toast');
+        const displayRoomCode = document.getElementById('display-room-code');
+        const questionText = document.getElementById('question-text');
+        const targetPlayerDisplay = document.getElementById('target-player-display');
+        const turnIndicator = document.getElementById('turn-indicator');
+        const clickHint = document.getElementById('click-hint');
+        const diceIcon = document.getElementById('dice-icon');
+        
+        const inputPlayerName = document.getElementById('input-player-name');
+        const inputRoomCode = document.getElementById('input-room-code');
+        const p1NameEl = document.getElementById('player1-name');
+        const p2NameEl = document.getElementById('player2-name');
+
+        // ฟังก์ชันแจ้งเตือน
+        function showToast(message, isError = true) {
+            toastEl.textContent = message;
+            toastEl.className = `absolute top-10 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded-full shadow-lg font-medium transition-all duration-300 ${isError ? 'bg-red-500 text-white' : 'bg-green-500 text-white'} show`;
+            setTimeout(() => {
+                toastEl.classList.remove('show');
+            }, 3000);
+        }
+
         // ตั้งค่า Firebase
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'random-dare-game';
         const firebaseConfigStr = typeof __firebase_config !== 'undefined' ? __firebase_config : null;
@@ -255,31 +281,7 @@
             "พิมพ์ข้อความสรุปความรู้สึกของการเล่นเกมนี้ส่งท้ายมา 1 ประโยค"
         ];
 
-        // UI Elements
-        const uiLoading = document.getElementById('loading-screen');
-        const uiLobby = document.getElementById('lobby-screen');
-        const uiGame = document.getElementById('game-screen');
-        const toastEl = document.getElementById('toast');
-        const displayRoomCode = document.getElementById('display-room-code');
-        const questionText = document.getElementById('question-text');
-        const targetPlayerDisplay = document.getElementById('target-player-display');
-        const turnIndicator = document.getElementById('turn-indicator');
-        const clickHint = document.getElementById('click-hint');
-        const diceIcon = document.getElementById('dice-icon');
-        
-        const inputPlayerName = document.getElementById('input-player-name');
-        const inputRoomCode = document.getElementById('input-room-code');
-        const p1NameEl = document.getElementById('player1-name');
-        const p2NameEl = document.getElementById('player2-name');
-
-        // ฟังก์ชันแจ้งเตือน
-        function showToast(message, isError = true) {
-            toastEl.textContent = message;
-            toastEl.className = `absolute top-10 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded-full shadow-lg font-medium transition-all duration-300 ${isError ? 'bg-red-500 text-white' : 'bg-green-500 text-white'} show`;
-            setTimeout(() => {
-                toastEl.classList.remove('show');
-            }, 3000);
-        }
+        // UI elements moved up
 
         function generateRoomCode() {
             return Math.floor(1000 + Math.random() * 9000).toString();
