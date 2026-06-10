@@ -11,7 +11,7 @@
     <style>
         body {
             font-family: 'Kanit', sans-serif;
-            background: linear-gradient(-45deg, #ff9a9e, #fecfef, #a1c4fd, #c2e9fb);
+            background: linear-gradient(-45deg, #0f172a, #1e1b4b, #312e81, #1e1b4b);
             background-size: 400% 400%;
             animation: gradientBG 15s ease infinite;
             overflow: hidden;
@@ -25,11 +25,11 @@
         }
 
         .glass-card {
-            background: rgba(255, 255, 255, 0.75);
+            background: rgba(30, 41, 59, 0.75);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
         }
 
         .pop-in {
@@ -75,7 +75,7 @@
     </style>
 </head>
 
-<body class="h-screen w-screen flex flex-col items-center justify-center text-gray-800 relative">
+<body class="h-screen w-screen flex flex-col items-center justify-center text-gray-200 relative">
 
     <!-- แจ้งเตือน (Toast) แทน alert() -->
     <div id="toast" class="absolute top-10 left-1/2 transform -translate-x-1/2 z-50 bg-red-500 text-white px-6 py-3 rounded-full shadow-lg font-medium whitespace-nowrap">
@@ -83,42 +83,42 @@
     </div>
 
     <!-- หน้าต่างรอโหลดตอนเชื่อมต่อเซิร์ฟเวอร์ -->
-    <div id="loading-screen" class="absolute inset-0 z-40 bg-white/50 backdrop-blur-sm flex flex-col items-center justify-center">
+    <div id="loading-screen" class="absolute inset-0 z-40 bg-gray-900/80 backdrop-blur-sm flex flex-col items-center justify-center">
         <div class="animate-spin text-4xl mb-4">🎲</div>
-        <p class="text-gray-700 font-medium animate-pulse">กำลังเชื่อมต่อ...</p>
+        <p class="text-gray-300 font-medium animate-pulse">กำลังเชื่อมต่อ...</p>
     </div>
 
     <!-- ล็อบบี้ สร้างห้อง / เข้าห้อง -->
     <div id="lobby-screen" class="hidden absolute inset-0 z-30 flex flex-col items-center justify-center p-6">
         <div class="text-center mb-6">
-            <h1 class="text-3xl md:text-4xl font-bold text-white drop-shadow-md flex items-center justify-center gap-2">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-100 drop-shadow-md flex items-center justify-center gap-2">
                 <span>🎲</span> สุ่มภารกิจ <span>💕</span>
             </h1>
-            <p class="text-white/90 text-sm mt-2 drop-shadow">เล่นพร้อมกัน ผลัดกันสุ่มคำถาม!</p>
+            <p class="text-gray-300 text-sm mt-2 drop-shadow">เล่นพร้อมกัน ผลัดกันสุ่มคำถาม!</p>
         </div>
 
         <div class="glass-card w-full max-w-sm rounded-3xl p-8 text-center shadow-xl space-y-5">
             
             <div class="space-y-2">
-                <label class="text-sm font-semibold text-gray-700 text-left block w-full pl-2">ชื่อของคุณ (แสดงในเกม)</label>
-                <input type="text" id="input-player-name" placeholder="กรอกชื่อ/ชื่อเล่น" class="w-full text-center text-xl font-medium text-gray-700 py-3 rounded-2xl border-2 border-pink-200 focus:border-pink-500 focus:outline-none bg-white/80">
+                <label class="text-sm font-semibold text-gray-300 text-left block w-full pl-2">ชื่อของคุณ (แสดงในเกม)</label>
+                <input type="text" id="input-player-name" placeholder="กรอกชื่อ/ชื่อเล่น" class="w-full text-center text-xl font-medium text-gray-200 py-3 rounded-2xl border-2 border-pink-800/50 focus:border-pink-500 focus:outline-none bg-gray-800/50 placeholder-gray-500">
             </div>
 
             <div class="pt-2">
                 <button id="btn-create-room" class="w-full bg-pink-500 hover:bg-pink-600 text-white font-semibold py-3 px-6 rounded-2xl shadow-lg transition transform hover:scale-105">
                     สร้างห้องใหม่
                 </button>
-                <p class="text-xs text-gray-500 mt-2">เพื่อส่งรหัสให้เพื่อนเข้ามาจอย</p>
+                <p class="text-xs text-gray-400 mt-2">เพื่อส่งรหัสให้เพื่อนเข้ามาจอย</p>
             </div>
 
             <div class="relative flex py-2 items-center">
-                <div class="flex-grow border-t border-gray-300"></div>
-                <span class="flex-shrink-0 mx-4 text-gray-400 text-sm">หรือ</span>
-                <div class="flex-grow border-t border-gray-300"></div>
+                <div class="flex-grow border-t border-gray-600"></div>
+                <span class="flex-shrink-0 mx-4 text-gray-500 text-sm">หรือ</span>
+                <div class="flex-grow border-t border-gray-600"></div>
             </div>
 
             <div class="space-y-3">
-                <input type="text" id="input-room-code" placeholder="กรอกรหัสห้อง 4 หลัก" maxlength="4" class="w-full text-center text-2xl tracking-widest font-bold text-gray-700 py-3 rounded-2xl border-2 border-blue-200 focus:border-blue-500 focus:outline-none uppercase bg-white/80">
+                <input type="text" id="input-room-code" placeholder="กรอกรหัสห้อง 4 หลัก" maxlength="4" class="w-full text-center text-2xl tracking-widest font-bold text-gray-200 py-3 rounded-2xl border-2 border-blue-800/50 focus:border-blue-500 focus:outline-none uppercase bg-gray-800/50 placeholder-gray-500">
                 <button id="btn-join-room" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-2xl shadow-lg transition transform hover:scale-105">
                     เข้าห้อง
                 </button>
@@ -131,20 +131,20 @@
         
         <!-- ข้อมูลห้อง และผู้เล่น -->
         <div class="absolute top-4 left-0 right-0 z-30 pointer-events-none flex flex-col justify-center items-center gap-2 px-4 w-full">
-            <div class="bg-white/40 backdrop-blur-md px-4 py-1.5 rounded-full shadow-sm border border-white/50 flex items-center gap-2">
-                <span class="text-xs text-gray-600 font-medium">รหัสห้อง:</span>
-                <span id="display-room-code" class="text-lg font-bold text-indigo-700 tracking-wider">----</span>
+            <div class="bg-gray-800/50 backdrop-blur-md px-4 py-1.5 rounded-full shadow-sm border border-white/10 flex items-center gap-2">
+                <span class="text-xs text-gray-400 font-medium">รหัสห้อง:</span>
+                <span id="display-room-code" class="text-lg font-bold text-indigo-300 tracking-wider">----</span>
             </div>
             
-            <div class="w-full max-w-md bg-white/60 backdrop-blur-md rounded-2xl p-3 shadow-sm border border-white/50 flex justify-between items-center mt-2">
-                <div id="player1-name" class="font-semibold text-pink-600 truncate w-1/3 text-center text-sm md:text-base">รอผู้เล่น...</div>
-                <div class="text-xs font-bold text-gray-400">VS</div>
-                <div id="player2-name" class="font-semibold text-blue-600 truncate w-1/3 text-center text-sm md:text-base">รอผู้เล่น...</div>
+            <div class="w-full max-w-md bg-gray-800/60 backdrop-blur-md rounded-2xl p-3 shadow-sm border border-white/10 flex justify-between items-center mt-2">
+                <div id="player1-name" class="font-semibold text-pink-400 truncate w-1/3 text-center text-sm md:text-base">รอผู้เล่น...</div>
+                <div class="text-xs font-bold text-gray-500">VS</div>
+                <div id="player2-name" class="font-semibold text-blue-400 truncate w-1/3 text-center text-sm md:text-base">รอผู้เล่น...</div>
             </div>
         </div>
 
         <!-- ปุ่มออกจากห้อง -->
-        <button id="btn-leave-room" class="absolute top-4 left-4 z-40 bg-white/40 backdrop-blur-md p-2 rounded-full shadow-sm border border-white/50 text-gray-700 hover:bg-white/60 transition">
+        <button id="btn-leave-room" class="absolute top-4 left-4 z-40 bg-gray-800/50 backdrop-blur-md p-2 rounded-full shadow-sm border border-white/10 text-gray-300 hover:bg-gray-700/50 transition">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
         </button>
 
@@ -161,14 +161,14 @@
             <div class="glass-card w-full max-w-md rounded-3xl p-8 md:p-10 text-center relative z-20 min-h-[320px] flex flex-col items-center justify-center transition-all duration-300 transform shadow-xl">
                 
                 <div class="h-full flex flex-col items-center justify-center w-full gap-4">
-                    <div id="question-text" class="text-lg md:text-2xl font-medium text-gray-800 leading-relaxed w-full">
+                    <div id="question-text" class="text-lg md:text-2xl font-medium text-gray-300 leading-relaxed w-full">
                         รอเพื่อนเข้ามาจอย...
                     </div>
                 </div>
             </div>
 
             <div class="absolute bottom-10 text-center z-20 pointer-events-none pulse-text" id="click-hint-container">
-                <p id="click-hint" class="text-white font-medium bg-black/20 px-6 py-2 rounded-full backdrop-blur-sm text-sm">
+                <p id="click-hint" class="text-white font-medium bg-white/10 px-6 py-2 rounded-full backdrop-blur-sm text-sm border border-white/5">
                     รอเพื่อนเข้าห้อง...
                 </p>
             </div>
@@ -256,7 +256,9 @@
 
         // ข้อมูลภารกิจทั้ง 100 ข้อ
         const missions = [
-            "พูดชมข้อดีของฉันมา 3 ข้อแบบห้ามซ้ำกัน", "ส่งสติกเกอร์ที่คิดว่าน่ารักที่สุดในเครื่องมาให้ตอนนี้เลย", "พูดประโยคบอกฝันดีล่วงหน้าด้วย 'เสียงสอง' หรือน้ำเสียงอ้อนๆ",
+            "พูดชมข้อดีของฉันมา 3 ข้อแบบห้ามซ้ำกัน", 
+            "ส่งสติกเกอร์ที่คิดว่าน่ารักที่สุดในเครื่องมาให้ตอนนี้เลย", 
+            "พูดประโยคบอกฝันดีล่วงหน้าด้วย 'เสียงสอง' หรือน้ำเสียงอ้อนๆ",
             "แกล้งไอจามแต่เปลี่ยนเสียงเป็นคำว่า 'รัก' ให้ฟังหน่อย", "ถ่ายรูปท้องฟ้าหรือวิวแถวนั้นกดส่งมาในแชทตอนนี้เลย", "ทำเสียงแมวอ้อนใส่ไมค์ 3 วินาทีครับ",
             "เล่าเหตุการณ์ที่ทำให้หัวใจเต้นแรงครั้งล่าสุดให้ฟังหน่อย", "แกล้งง้อฉันหน่อย สมมติว่าตอนนี้ฉันกำลังงอนคุณอยู่", "บอก 1 สิ่งที่ทำให้คุณคิดถึงหน้าฉันในวันนี้",
             "พูดประโยคบอกรักหรือบอกชอบ โดยห้ามใช้คำว่า 'รัก' หรือ 'ชอบ'", "ส่งเสียงจูบ (Mwah) ผ่านสายให้ได้ยิน 1 ทีครับ", "บอกสเปกในฝันข้อที่ตรงกับตัวฉันมากที่สุดมา 1 อย่าง",
@@ -518,7 +520,7 @@
                     }, 2000);
                 } else if (!data.rollId && !isRollingAnimationActive) {
                     // สถานะก่อนเริ่มเกม
-                    questionText.innerHTML = `<span class="font-bold text-indigo-900">${data.text || ''}</span>`;
+                    questionText.innerHTML = `<span class="font-bold text-indigo-200">${data.text || ''}</span>`;
                 } else if (data.rollId === lastSeenRollId && !isRollingAnimationActive) {
                     // กรณีคนเข้าห้องมาทีหลัง หรือรีเฟรชหน้าเว็บ ให้โชว์ผลลัพธ์ล่าสุดได้เลย
                     stopLocalRollingAnimation(data.text, data.targetPlayerUid);
@@ -622,7 +624,7 @@
                     questionText.innerHTML = `
                         <div class="flex flex-col items-center gap-2 p-2">
                             <div class="text-4xl animate-bounce">🔒</div>
-                            <span class="font-bold text-gray-500 text-base md:text-xl">ภารกิจถูกซ่อนไว้!</span>
+                            <span class="font-bold text-gray-300 text-base md:text-xl">ภารกิจถูกซ่อนไว้!</span>
                             <span class="text-sm font-normal text-gray-400">คุณมีหน้าที่ต้องทำ/ตอบ รอเพื่อนอ่านออกเสียงให้ฟังนะ 🤫</span>
                         </div>
                     `;
@@ -631,13 +633,13 @@
                         <div class="flex flex-col items-center gap-1">
                              <div class="text-4xl animate-bounce">📢</div>
                             <span class="text-sm md:text-base font-medium tracking-wide text-indigo-400">อ่านคำถามนี้ให้เพื่อนฟัง</span>
-                            <span class="font-bold text-indigo-900 text-lg md:text-2xl leading-relaxed mt-1">${finalText}</span>
+                            <span class="font-bold text-indigo-200 text-lg md:text-2xl leading-relaxed mt-1">${finalText}</span>
                         </div>
                     `;
                 }
             } else {
                 if (finalText) {
-                    questionText.innerHTML = `<span class="font-bold text-indigo-900">${finalText}</span>`;
+                    questionText.innerHTML = `<span class="font-bold text-indigo-200">${finalText}</span>`;
                 }
             }
             
