@@ -179,7 +179,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot, serverTimestamp, deleteField } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // UI Elements
         const uiLoading = document.getElementById('loading-screen');
@@ -246,6 +246,7 @@
         let roomPlayers = {}; 
         let amICurrentRoller = false;
         let lastSeenRollId = null;
+        let previousPlayers = {};
 
         // ข้อมูลภารกิจทั้ง 100 ข้อ
         const missions = [
@@ -409,12 +410,24 @@
         });
 
         // ออกจากห้อง
-        document.getElementById('btn-leave-room').addEventListener('click', () => {
+        document.getElementById('btn-leave-room').addEventListener('click', async () => {
+            if (currentRoomId && localUserId) {
+                const docRef = getRoomDocRef(currentRoomId);
+                try {
+                    await updateDoc(docRef, {
+                        [`players.${localUserId}`]: deleteField()
+                    });
+                } catch (e) {
+                    console.error("Error leaving room:", e);
+                }
+            }
+            
             if (unsubscribeSnapshot) {
                 unsubscribeSnapshot();
                 unsubscribeSnapshot = null;
             }
             currentRoomId = null;
+            previousPlayers = {};
             uiGame.classList.add('hidden');
             uiLobby.classList.remove('hidden');
             inputRoomCode.value = '';
@@ -441,6 +454,17 @@
                 
                 const data = docSnap.data();
                 roomPlayers = data.players || {};
+                
+                // แจ้งเตือนเมื่อมีคนออกจากห้อง
+                if (Object.keys(previousPlayers).length > 0) {
+                    for (const uid in previousPlayers) {
+                        if (!roomPlayers[uid]) {
+                            showToast(`ผู้เล่น ${previousPlayers[uid].name} ออกจากห้องไปแล้ว`, true);
+                        }
+                    }
+                }
+                previousPlayers = { ...roomPlayers };
+                
                 const pKeys = Object.keys(roomPlayers);
                 
                 // อัปเดตรายชื่อผู้เล่น
@@ -497,6 +521,8 @@
         function startLocalRollingAnimation() {
             isRollingAnimationActive = true;
             questionText.classList.remove('pop-in');
+            turnIndicator.classList.add('opacity-0');
+            clickHint.parentElement.classList.add('opacity-0');
             
             questionText.classList.add('shaking');
             
@@ -577,6 +603,8 @@
             }
             
             questionText.classList.remove('shaking');
+            turnIndicator.classList.remove('opacity-0');
+            clickHint.parentElement.classList.remove('opacity-0');
             
             void questionText.offsetWidth; // trigger reflow
             
